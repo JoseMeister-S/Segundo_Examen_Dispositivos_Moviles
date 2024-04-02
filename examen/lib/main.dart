@@ -1,6 +1,6 @@
 import 'package:examen/api_service.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 void main() {
   runApp(const MainApp());
@@ -26,20 +26,20 @@ class PostListPage extends StatefulWidget {
 }
 
 class _PostListPageState extends State<PostListPage> {
-  final ApiService _apiService = ApiService(); // Create instance of ApiService
+  final ApiService _apiService = ApiService();
 
-  List<dynamic> posts = []; // List to store posts
+  List<dynamic> posts = [];
 
   @override
   void initState() {
     super.initState();
-    fetchPosts(); // Call fetchPosts when the widget initializes
+    fetchPosts();
   }
 
   Future<void> fetchPosts() async {
     List<dynamic> fetchedPosts = await _apiService.fetchPosts();
     setState(() {
-      posts = fetchedPosts; // Store the fetched posts
+      posts = fetchedPosts;
     });
   }
 
@@ -47,7 +47,7 @@ class _PostListPageState extends State<PostListPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Posts'),
+        title: Text('Posts, Examen'),
       ),
       body: ListView.builder(
         itemCount: posts.length,
@@ -63,11 +63,27 @@ class _PostListPageState extends State<PostListPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('ID: ${posts[index]['id']}', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text('ID: ${posts[index]['id']}',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                   SizedBox(height: 8),
                   Text(posts[index]['title'], style: TextStyle(fontSize: 16)),
                   SizedBox(height: 8),
                   Text(posts[index]['body']),
+                  RatingBar.builder(
+                    initialRating: 3,
+                    minRating: 1,
+                    direction: Axis.horizontal,
+                    allowHalfRating: true,
+                    itemCount: 5,
+                    itemPadding: EdgeInsets.symmetric(horizontal: 4.0),
+                    itemBuilder: (context, _) => Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                    ),
+                    onRatingUpdate: (rating) {
+                      print(rating);
+                    },
+                  )
                 ],
               ),
             ),
