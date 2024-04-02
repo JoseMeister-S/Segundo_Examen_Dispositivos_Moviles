@@ -1,6 +1,7 @@
 import 'package:examen/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MainApp());
@@ -13,7 +14,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'SEGUNDO PARCIAL Programación Móvil UCB',
-      home: PostListPage(), // Use PostListPage as the home page
+      home: PostListPage(), 
     );
   }
 }
@@ -27,13 +28,18 @@ class PostListPage extends StatefulWidget {
 
 class _PostListPageState extends State<PostListPage> {
   final ApiService _apiService = ApiService();
-
   List<dynamic> posts = [];
+  List<double> ratings = [];
 
   @override
   void initState() {
     super.initState();
-    fetchPosts();
+    _initializeData();
+  }
+
+  Future<void> _initializeData() async {
+    await fetchPosts(); 
+    await loadRatings(); 
   }
 
   Future<void> fetchPosts() async {
@@ -41,6 +47,20 @@ class _PostListPageState extends State<PostListPage> {
     setState(() {
       posts = fetchedPosts;
     });
+  }
+
+  Future<void> loadRatings() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      ratings = List<double>.generate(posts.length, (index) {
+        return prefs.getDouble('rating_$index') ?? 3.0;
+      });
+    });
+  }
+
+  Future<void> saveRating(int index, double rating) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setDouble('rating_$index', rating); 
   }
 
   @override
@@ -70,7 +90,7 @@ class _PostListPageState extends State<PostListPage> {
                   SizedBox(height: 8),
                   Text(posts[index]['body']),
                   RatingBar.builder(
-                    initialRating: 3,
+                    initialRating: ratings[index],
                     minRating: 1,
                     direction: Axis.horizontal,
                     allowHalfRating: true,
@@ -81,7 +101,10 @@ class _PostListPageState extends State<PostListPage> {
                       color: Colors.amber,
                     ),
                     onRatingUpdate: (rating) {
-                      print(rating);
+                      setState(() {
+                        ratings[index] = rating;
+                      });
+                      saveRating(index, rating); // Save the updated rating
                     },
                   )
                 ],

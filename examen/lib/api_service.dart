@@ -5,7 +5,8 @@ class ApiService {
 
   Future<List<dynamic>> fetchPosts() async {
     try {
-      Response response = await dio.get('https://jsonplaceholder.typicode.com/posts');
+      Response response =
+          await dio.get('https://jsonplaceholder.typicode.com/posts');
       return response.data;
     } catch (e) {
       print('Error fetching posts: $e');
