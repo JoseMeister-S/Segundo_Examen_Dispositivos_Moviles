@@ -1,5 +1,6 @@
+import 'package:examen/api_service.dart';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart'; 
+
 
 void main() {
   runApp(const MainApp());
@@ -12,7 +13,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'SEGUNDO PARCIAL Programación Móvil UCB',
-      home: PostListPage(), 
+      home: PostListPage(), // Use PostListPage as the home page
     );
   }
 }
@@ -25,25 +26,21 @@ class PostListPage extends StatefulWidget {
 }
 
 class _PostListPageState extends State<PostListPage> {
-  Dio dio = Dio();
+  final ApiService _apiService = ApiService(); // Create instance of ApiService
 
-  List<dynamic> posts = []; 
+  List<dynamic> posts = []; // List to store posts
 
   @override
   void initState() {
     super.initState();
-    fetchPosts(); 
+    fetchPosts(); // Call fetchPosts when the widget initializes
   }
 
   Future<void> fetchPosts() async {
-    try {
-      Response response = await dio.get('https://jsonplaceholder.typicode.com/posts');
-      setState(() {
-        posts = response.data; 
-      });
-    } catch (e) {
-      print('Error fetching posts: $e');
-    }
+    List<dynamic> fetchedPosts = await _apiService.fetchPosts();
+    setState(() {
+      posts = fetchedPosts; // Store the fetched posts
+    });
   }
 
   @override
@@ -55,9 +52,25 @@ class _PostListPageState extends State<PostListPage> {
       body: ListView.builder(
         itemCount: posts.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text('ID: ${posts[index]['id']} - ${posts[index]['title']}'),
-            subtitle: Text(posts[index]['body']),
+          return Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('ID: ${posts[index]['id']}', style: TextStyle(fontWeight: FontWeight.bold)),
+                  SizedBox(height: 8),
+                  Text(posts[index]['title'], style: TextStyle(fontSize: 16)),
+                  SizedBox(height: 8),
+                  Text(posts[index]['body']),
+                ],
+              ),
+            ),
           );
         },
       ),
